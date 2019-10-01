@@ -101,7 +101,7 @@ public class AutoStart extends CordovaPlugin {
         if (enabled) {
             Class clzz = cordova.getActivity().getClass();
 
-            hideApp(clzz, componentState);
+            hideApp(clzz, PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
         }
     }
 
