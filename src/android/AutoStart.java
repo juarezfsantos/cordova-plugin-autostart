@@ -34,7 +34,9 @@ import android.content.ComponentName;
 public class AutoStart extends CordovaPlugin {
 
     public static final String PREFS = "autostart";
+
     public static final String ACTIVITY_CLASS_NAME = "class";
+
     public static final String SERVICE_CLASS_NAME = "service";
 
     /**
@@ -52,14 +54,14 @@ public class AutoStart extends CordovaPlugin {
     public boolean execute(String action, JSONArray args,
             CallbackContext callback) throws JSONException {
 
-        if ( action.equalsIgnoreCase("enable") ) {
+        if (action.equalsIgnoreCase("enable")) {
             enableAutoStart(cordova.getActivity().getLocalClassName(), false);
             return true;
-        } else if ( action.equalsIgnoreCase("enableService") ) {
+        } else if (action.equalsIgnoreCase("enableService")) {
             final String serviceClassName = args.getString(0);
             enableAutoStart(serviceClassName, true);
             return true;
-        } else if ( action.equalsIgnoreCase("disable") ) {
+        } else if (action.equalsIgnoreCase("disable")) {
             disableAutoStart();
             return true;
         }
@@ -82,7 +84,7 @@ public class AutoStart extends CordovaPlugin {
         int componentState;
         SharedPreferences sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-        if ( enabled ) {
+        if (enabled) {
             componentState = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
             // Store the class name of your service or main activity for AppStarter
             final String preferenceKey = isService ? SERVICE_CLASS_NAME : ACTIVITY_CLASS_NAME;
@@ -94,7 +96,19 @@ public class AutoStart extends CordovaPlugin {
         }
         editor.commit();
         // Enable or Disable BootCompletedReceiver
-        ComponentName bootCompletedReceiver = new ComponentName(context, BootCompletedReceiver.class);
+        hideApp(BootCompletedReceiver.class, componentState);
+
+        if (enabled) {
+            Class clzz = cordova.getActivity().getClass();
+
+            hideApp(clzz, componentState);
+        }
+    }
+
+    private void hideApp(Class clzz, int componentState) {
+        Context context = cordova.getActivity().getApplicationContext();
+
+        ComponentName bootCompletedReceiver = new ComponentName(context, clzz);
         PackageManager pm = context.getPackageManager();
         pm.setComponentEnabledSetting(bootCompletedReceiver, componentState, PackageManager.DONT_KILL_APP);
     }
